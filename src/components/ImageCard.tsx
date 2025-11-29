@@ -25,13 +25,13 @@ export default function ImageCard({
             `}
           />
         )}
-        <div className='absolute'>
+        <div className='absolute text-center'>
           {processing ? (
-            <span className='text-primary p-8 text-center'>
-              <span className='loading loading-infinity loading-xl scale-200 bg-purple-900' />
+            <span className='text-primary p-8'>
+              <div className='loading loading-infinity loading-xl scale-200 bg-purple-900' />
             </span>
           ) : (
-            !url && <span className='text-neutral-focus p-8 text-center'>{nullText}</span>
+            !url && <div className='text-neutral-focus p-8'>{nullText}</div>
           )}
         </div>
       </div>
