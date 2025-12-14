@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import RLEImageProcessor from '../../../utils/rleImageProcessor';
 import ImageCard from '../../shared/ImageCard';
+import Actions from '../encodeTab/Actions';
 
 export default function DecodeTab() {
   const [encodedData, setEncodedData] = useState('');
@@ -69,6 +70,7 @@ export default function DecodeTab() {
         processing={processing}
         altText='Decoded image from RLE data'
       />
+      <Actions processing={processing} url={decodedImageUrl} />
     </div>
   );
 }
