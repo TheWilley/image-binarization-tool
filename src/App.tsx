@@ -1,7 +1,7 @@
-import Footer from './components/Footer';
-import Wrapper from './components/Wrapper';
+import Footer from './components/ui/base/Footer';
+import Wrapper from './components/ui/base/Wrapper';
 import Tabs from './components/shared/Tabs';
-import Header from './components/Header';
+import Header from './components/ui/base/Header';
 import DecodeTab from './components/ui/tabs/DecodeTab';
 import EncodeTab from './components/ui/tabs/EncodeTab';
 

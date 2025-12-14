@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import type { Algorithm } from '../../../hooks/useThreshold';
-import Setting from '../../Settings';
-import Results from '../../Results';
-import Actions from '../../Actions';
-import EncodedData from '../EncodedData';
+import Setting from '../encodeTab/Settings';
+import Results from '../encodeTab/Results';
+import Actions from '../encodeTab/Actions';
+import EncodedData from '../encodeTab/EncodedData';
 import useImageThreshold from '../../../hooks/useThreshold';
 
 export default function EncodeTab() {

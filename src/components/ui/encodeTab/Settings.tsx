@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
-import { algorithms, type Algorithm } from '../hooks/useThreshold';
-import type { Setter } from '../global/types';
+import { algorithms, type Algorithm } from '../../../hooks/useThreshold';
+import type { Setter } from '../../../global/types';
 
 export default function Setting({
   selectedFile,
