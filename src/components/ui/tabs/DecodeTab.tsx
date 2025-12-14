@@ -6,6 +6,7 @@ export default function DecodeTab() {
   const [encodedData, setEncodedData] = useState('');
   const [decodedImageUrl, setDecodedImageUrl] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDecode = () => {
     if (!encodedData.trim()) return;
@@ -35,9 +36,12 @@ export default function DecodeTab() {
           }
           setProcessing(false);
         });
+
+        setError(null);
       }
     } catch (error) {
       console.error('Failed to decode image:', error);
+      setError('Failed to decode image. Please check the encoded data format.');
       setProcessing(false);
     }
   };
@@ -55,6 +59,7 @@ export default function DecodeTab() {
         <button className='btn mt-4' onClick={handleDecode} disabled={processing}>
           {processing ? 'Decoding...' : 'Decode'}
         </button>
+        {error && <p className='text-red-500 mt-2 text-center'>{error}</p>}
       </div>
 
       <ImageCard
