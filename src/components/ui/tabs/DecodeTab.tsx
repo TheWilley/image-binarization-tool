@@ -44,7 +44,7 @@ export default function DecodeTab() {
 
   return (
     <div className='grid grid-cols-1 gap-4'>
-      <div className='card bg-base-100 border border-base-300 p-4 rounded-lg'>
+      <div className='card bg-[#0a0a0a] border border-base-300 p-4 rounded-lg'>
         <h3 className='card-title text-xl font-semibold mb-3'>Input Encoded Data</h3>
         <textarea
           className='textarea w-full font-mono'
@@ -52,11 +52,7 @@ export default function DecodeTab() {
           value={encodedData}
           onChange={(e) => setEncodedData(e.target.value)}
         />
-        <button
-          className='btn btn-primary mt-4'
-          onClick={handleDecode}
-          disabled={processing}
-        >
+        <button className='btn mt-4' onClick={handleDecode} disabled={processing}>
           {processing ? 'Decoding...' : 'Decode'}
         </button>
       </div>
