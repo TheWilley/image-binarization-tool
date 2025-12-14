@@ -21,7 +21,7 @@ export default function Actions({
   };
 
   return (
-    <div className='card bg-base-100 w-full shadow-md mb-10'>
+    <div className='card bg-base-100 w-full shadow-md mb-5'>
       <div className='card-body p-0 grid grid-cols-1 md:grid-cols-2 gap-3'>
         <button className='btn' onClick={saveImage} disabled={processing || !url}>
           <svg
