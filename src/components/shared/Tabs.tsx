@@ -28,7 +28,16 @@ export default function Tabs({
           </a>
         ))}
       </div>
-      <div>{children[activeTab]}</div>
+      <div>
+        {Object.keys(children).map((key, index) => (
+          <div
+            key={index}
+            style={{ display: activeTab === tabs[index].key ? 'block' : 'none' }}
+          >
+            {children[key]}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
