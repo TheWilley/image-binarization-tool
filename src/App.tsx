@@ -4,7 +4,7 @@ import Results from './components/Results';
 import Setting from './components/Settings';
 import useImageThreshold from './hooks/useThreshold';
 import Wrapper from './components/Wrapper';
-import Tabs from './components/Tabs';
+import Tabs from './components/shared/Tabs';
 import { useState } from 'react';
 import type { Algorithm } from './hooks/useThreshold';
 import EncodedData from './components/ui/EncodedData';

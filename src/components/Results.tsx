@@ -1,4 +1,4 @@
-import ImageCard from './ImageCard';
+import ImageCard from './shared/ImageCard';
 import type { Algorithm } from '../hooks/useThreshold';
 
 export default function Results({

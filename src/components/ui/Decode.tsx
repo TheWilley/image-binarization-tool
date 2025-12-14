@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import RLEImageProcessor from '../../utils/rleImageProcessor';
-import ImageCard from '../ImageCard';
+import ImageCard from '../shared/ImageCard';
 
 export default function Decode() {
   const [encodedData, setEncodedData] = useState('');
