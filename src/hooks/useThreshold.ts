@@ -1,6 +1,7 @@
 import { readImg } from 'image-js';
 import { useCallback, useEffect, useState } from 'react';
 import type { Mask } from 'image-js';
+import RLEImageProcessor from '../utils/rleImageProcessor';
 
 export const algorithms = [
   'manual',
@@ -23,9 +24,14 @@ export const algorithms = [
 
 export type Algorithm = (typeof algorithms)[number];
 
-function imageToUrl(image: Mask, invert: boolean, callback: (url: string) => void) {
+function imageToUrl(
+  image: Mask,
+  invert: boolean,
+  callback: (url: string, encodedData: string) => void
+) {
   const { width, height } = image;
   const raw = image.getRawImage().data;
+  let encodedData = '';
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -41,7 +47,6 @@ function imageToUrl(image: Mask, invert: boolean, callback: (url: string) => voi
     // Prepare an RGBA output buffer
     const output = new Uint8ClampedArray(width * height * 4);
 
-    // Convert raw binary data into opaque pixels
     for (let i = 0; i < width * height; i++) {
       const v = raw[i] ? (invert ? 0 : 255) : invert ? 255 : 0; // On or off → white or black
       const idx = i * 4; // RGBA stride
@@ -51,15 +56,20 @@ function imageToUrl(image: Mask, invert: boolean, callback: (url: string) => voi
       output[idx + 3] = 255; // A (fully opaque)
     }
 
-    // Paint the final image onto the canvas
     const imgData = new ImageData(output, width, height);
+    encodedData = RLEImageProcessor.processImageData(
+      Array.from(imgData.data),
+      width,
+      height
+    );
+
     ctx.putImageData(imgData, 0, 0);
   }
 
   canvas.toBlob((blob) => {
     if (blob) {
       const url = URL.createObjectURL(blob);
-      callback(url);
+      callback(url, encodedData);
     }
   }, 'image/png');
 }
@@ -73,6 +83,7 @@ export default function useImageThreshold(
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
   const [thresholdedUrl, setThresholdedUrl] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [encodedData, setEncodedData] = useState<string>('');
 
   const processImage = useCallback(() => {
     if (!file) {
@@ -102,7 +113,8 @@ export default function useImageThreshold(
               : { threshold: thresholdValue / 255 }),
           });
 
-          imageToUrl(thresholdedImage, invert, (url) => {
+          imageToUrl(thresholdedImage, invert, (url, encodedData) => {
+            setEncodedData(encodedData);
             setThresholdedUrl(url);
           });
         } catch (error) {
@@ -136,5 +148,5 @@ export default function useImageThreshold(
     };
   }, [processImage, invert]);
 
-  return { originalUrl, thresholdedUrl, processing, processImage };
+  return { originalUrl, thresholdedUrl, processing, encodedData, processImage };
 }
