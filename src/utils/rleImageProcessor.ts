@@ -91,20 +91,19 @@ export default class RLEImageProcessor {
   }
 
   private static stringifyRunLength(data: RLEData): string {
-    return `${data.startColor}|${data.width}|${data.height}|${data.runs.join(',')}`;
+    return `${data.width}|${data.height}|${data.runs.join(',')}`;
   }
 
   private static parseRunLengthString(str: string): RLEData | null {
     try {
       const parts = str.split('|');
-      if (parts.length < 4) return null;
+      if (parts.length < 3) return null;
 
-      const startColor = parseInt(parts[0], 10);
-      const width = parseInt(parts[1], 10);
-      const height = parseInt(parts[2], 10);
-      const runsStr = parts[3];
+      const width = parseInt(parts[0], 10);
+      const height = parseInt(parts[1], 10);
+      const runsStr = parts[2];
 
-      if ((startColor !== 0 && startColor !== 1) || isNaN(width) || isNaN(height)) {
+      if (isNaN(width) || isNaN(height)) {
         return null;
       }
 
@@ -114,7 +113,6 @@ export default class RLEImageProcessor {
       if (runs.some(isNaN)) return null;
 
       return {
-        startColor: startColor as 0 | 1,
         width,
         height,
         runs,
@@ -131,7 +129,6 @@ export default class RLEImageProcessor {
   ): string {
     const binaryArray = this.rgbaToBinary(rgbaData);
     const rleData: RLEData = {
-      startColor: binaryArray[0] === 0 ? 0 : 1,
       width,
       height,
       runs: this.encodeRunLength(binaryArray),
