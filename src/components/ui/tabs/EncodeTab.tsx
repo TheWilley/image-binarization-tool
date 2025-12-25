@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Algorithm } from '../../../hooks/useEncode';
 import Setting from '../encodeTab/Settings';
 import Results from '../../shared/Results';
-import Actions from '../encodeTab/Actions';
+import Actions from '../../shared/Actions';
 import EncodedData from '../encodeTab/EncodedData';
 import useEncode from '../../../hooks/useEncode';
 

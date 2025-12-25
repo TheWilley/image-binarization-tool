@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import RLEImageProcessor from '../../../utils/rleImageProcessor';
 import ImageCard from '../../shared/ImageCard';
-import Actions from '../encodeTab/Actions';
+import Actions from '../../shared/Actions';
 
 export default function DecodeTab() {
   const [encodedData, setEncodedData] = useState('');
