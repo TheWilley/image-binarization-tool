@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 
 interface Tab {
   label: string;
@@ -8,11 +8,19 @@ interface Tab {
 export default function Tabs({
   tabs,
   children,
+  defaultTab,
 }: {
   tabs: Tab[];
   children: { [key: string]: ReactNode };
+  defaultTab?: string;
 }) {
-  const [activeTab, setActiveTab] = useState(tabs[0].key);
+  const [activeTab, setActiveTab] = useState(defaultTab || tabs[0].key);
+
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
 
   return (
     <div>
