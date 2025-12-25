@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
-import { algorithms, type Algorithm } from '../../../hooks/useThreshold';
+import { algorithms, type Algorithm } from '../../../hooks/useEncode';
 import type { Setter } from '../../../global/types';
 
 export default function Setting({

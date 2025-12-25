@@ -74,7 +74,7 @@ function imageToUrl(
   }, 'image/png');
 }
 
-export default function useImageThreshold(
+export default function useEncode(
   file: File | null,
   thresholdValue: number,
   algorithm: Algorithm,

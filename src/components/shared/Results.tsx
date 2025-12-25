@@ -1,5 +1,5 @@
 import ImageCard from './ImageCard';
-import type { Algorithm } from '../../hooks/useThreshold';
+import type { Algorithm } from '../../hooks/useEncode';
 
 export default function Results({
   originalUrl,

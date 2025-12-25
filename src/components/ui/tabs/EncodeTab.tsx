@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import type { Algorithm } from '../../../hooks/useThreshold';
+import type { Algorithm } from '../../../hooks/useEncode';
 import Setting from '../encodeTab/Settings';
 import Results from '../../shared/Results';
 import Actions from '../encodeTab/Actions';
 import EncodedData from '../encodeTab/EncodedData';
-import useImageThreshold from '../../../hooks/useThreshold';
+import useEncode from '../../../hooks/useEncode';
 
 export default function EncodeTab() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -12,7 +12,7 @@ export default function EncodeTab() {
   const [algorithm, setAlgorithm] = useState<Algorithm>('otsu');
   const [invert, setInvert] = useState(false);
 
-  const { originalUrl, thresholdedUrl, processing, encodedData } = useImageThreshold(
+  const { originalUrl, thresholdedUrl, processing, encodedData } = useEncode(
     selectedFile,
     threshold,
     algorithm,
