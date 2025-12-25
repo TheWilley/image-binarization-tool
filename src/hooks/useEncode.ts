@@ -44,6 +44,8 @@ function imageToUrl(
   // the "on" or "off" states onto a canvas, where 0 represents
   // white and 1 black.
   if (ctx) {
+    ctx.imageSmoothingEnabled = false;
+
     // Prepare an RGBA output buffer
     const output = new Uint8ClampedArray(width * height * 4);
 

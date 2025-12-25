@@ -22,6 +22,7 @@ export default function useDecode(encodedData: string) {
       const ctx = canvas.getContext('2d');
 
       if (ctx) {
+        ctx.imageSmoothingEnabled = false;
         const clamped = new Uint8ClampedArray(rgbaData);
         const imageData = new ImageData(clamped, width, height);
         ctx.putImageData(imageData, 0, 0);
