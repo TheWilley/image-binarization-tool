@@ -1,4 +1,5 @@
 import { useState, useEffect, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Tab {
   label: string;
@@ -15,12 +16,18 @@ export default function Tabs({
   defaultTab?: string;
 }) {
   const [activeTab, setActiveTab] = useState(defaultTab || tabs[0].key);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (defaultTab) {
       setActiveTab(defaultTab);
     }
   }, [defaultTab]);
+
+  const handleTabClick = (tabKey: string) => {
+    setActiveTab(tabKey);
+    navigate(`?tab=${tabKey}`);
+  };
 
   return (
     <div>
@@ -30,7 +37,7 @@ export default function Tabs({
             key={tab.key}
             role='tab'
             className={`tab ${activeTab === tab.key ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => handleTabClick(tab.key)}
           >
             {tab.label}
           </a>
