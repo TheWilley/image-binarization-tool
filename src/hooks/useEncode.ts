@@ -59,7 +59,7 @@ function imageToUrl(
     }
 
     const imgData = new ImageData(output, width, height);
-    encodedData = RLEImageProcessor.processImageData(
+    encodedData = new RLEImageProcessor().processImageData(
       Array.from(imgData.data),
       width,
       height

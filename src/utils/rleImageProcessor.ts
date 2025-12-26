@@ -1,7 +1,7 @@
 import type { RLEData } from '../global/types';
 
 export default class RLEImageProcessor {
-  private static rgbaToBinary(rgbaArray: number[]): number[] {
+  private rgbaToBinary(rgbaArray: number[]): number[] {
     const binaryArray = [];
 
     for (let i = 0; i < rgbaArray.length; i += 4) {
@@ -21,10 +21,7 @@ export default class RLEImageProcessor {
     return binaryArray;
   }
 
-  private static binaryToRgba(
-    binaryArray: number[],
-    alphaValue: number
-  ): Uint8ClampedArray {
+  private binaryToRgba(binaryArray: number[], alphaValue: number): Uint8ClampedArray {
     const rgbaArray = new Uint8ClampedArray(binaryArray.length * 4);
 
     for (let i = 0; i < binaryArray.length; i++) {
@@ -47,7 +44,7 @@ export default class RLEImageProcessor {
     return rgbaArray;
   }
 
-  private static encodeRunLength(binaryArray: number[]): number[] {
+  private encodeRunLength(binaryArray: number[]): number[] {
     if (binaryArray.length === 0) {
       return [];
     }
@@ -73,7 +70,7 @@ export default class RLEImageProcessor {
     return encoded;
   }
 
-  private static decodeRunLength(encoded: number[]): number[] {
+  private decodeRunLength(encoded: number[]): number[] {
     if (encoded.length === 0) {
       return [];
     }
@@ -90,11 +87,11 @@ export default class RLEImageProcessor {
     return binaryArray;
   }
 
-  private static stringifyRunLength(data: RLEData): string {
+  private stringifyRunLength(data: RLEData): string {
     return `${data.width}|${data.height}|${data.runs.join(',')}`;
   }
 
-  private static parseRunLengthString(str: string): RLEData | null {
+  private parseRunLengthString(str: string): RLEData | null {
     try {
       const parts = str.split('|');
       if (parts.length < 3) return null;
@@ -122,11 +119,7 @@ export default class RLEImageProcessor {
     }
   }
 
-  public static processImageData(
-    rgbaData: number[],
-    width: number,
-    height: number
-  ): string {
+  public processImageData(rgbaData: number[], width: number, height: number): string {
     const binaryArray = this.rgbaToBinary(rgbaData);
     const rleData: RLEData = {
       width,
@@ -136,7 +129,7 @@ export default class RLEImageProcessor {
     return this.stringifyRunLength(rleData);
   }
 
-  public static decodeImageData(data: string): {
+  public decodeImageData(data: string): {
     width: number;
     height: number;
     rgbaData: Uint8ClampedArray;

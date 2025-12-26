@@ -13,7 +13,9 @@ export default function useDecode(encodedData: string) {
       setProcessing(true);
 
       // Decode the RLE data into RGBA format
-      const { width, height, rgbaData } = RLEImageProcessor.decodeImageData(encodedData);
+      const { width, height, rgbaData } = new RLEImageProcessor().decodeImageData(
+        encodedData
+      );
 
       // Create a canvas to render the decoded image
       const canvas = document.createElement('canvas');
