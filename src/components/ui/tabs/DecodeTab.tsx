@@ -25,7 +25,7 @@ export default function DecodeTab() {
 
       <ImageCard
         title='Decoded Image'
-        nullText='Decoded image will appear here.'
+        nullText='Decoded image will appear here'
         url={decodedImageUrl}
         processing={processing}
         altText='Decoded image from RLE data'

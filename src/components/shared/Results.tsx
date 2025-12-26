@@ -25,7 +25,7 @@ export default function Results({
       />
       <ImageCard
         title={`Thresholded Image (${algorithm})`}
-        nullText='Thresholded result will appear here.'
+        nullText='Thresholded result will appear here'
         url={thresholdedUrl}
         processing={processing}
         altText={`Binarized image using ${algorithm} mode and threshold ${threshold}`}
