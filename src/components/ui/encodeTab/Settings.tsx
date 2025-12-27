@@ -86,6 +86,7 @@ export default function Setting({
               ))}
             </select>
           </div>
+          {algorithm === 'manual' && (
           <div className='form-control mb-6'>
             <label className='label'>
               <span className='label-text font-semibold mb-2'>
@@ -101,10 +102,11 @@ export default function Setting({
               onChange={handleThresholdChange}
               onMouseUp={handleThresholdChangeCommit}
               onTouchEnd={handleThresholdChangeCommit}
-              disabled={!selectedFile || processing || algorithm !== 'manual'}
+                disabled={!selectedFile || processing}
               className='range range-primary w-full'
             />
           </div>
+          )}
           <div className='form-control mb-6'>
             <label className='label'>
               <input
