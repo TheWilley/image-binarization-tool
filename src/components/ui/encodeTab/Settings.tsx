@@ -91,7 +91,7 @@ export default function Setting({
             <label className='label'>
               <span className='label-text font-semibold mb-2'>
                 Threshold Value (0–255):{' '}
-                <span className='text-primary'>{localThreshold}</span>{' '}
+                  <span className='text-base-content'>{localThreshold}</span>{' '}
               </span>
             </label>
             <input
