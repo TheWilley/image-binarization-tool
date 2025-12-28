@@ -46,7 +46,6 @@ export default function Setting({
   };
 
   const handleInvertChange = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value);
     setInvert(event.target.checked);
   };
 
