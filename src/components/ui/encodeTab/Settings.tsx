@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 import { algorithms, type Algorithm } from '../../../hooks/useEncode';
 import type { Setter } from '../../../global/types';
+import { ThresholdAlgorithm } from './ThresholdAlgorithm';
 
 export default function Setting({
   selectedFile,
@@ -84,6 +85,7 @@ export default function Setting({
                 </option>
               ))}
             </select>
+            <ThresholdAlgorithm algorithm={algorithm} />
           </div>
           {algorithm === 'manual' && (
           <div className='form-control mb-6'>
