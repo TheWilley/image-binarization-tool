@@ -28,7 +28,7 @@ export default function Results({
         nullText='Thresholded result will appear here'
         url={thresholdedUrl}
         processing={processing}
-        altText={`Binarized image using ${algorithm} mode and threshold ${threshold}`}
+        altText={`Binarized image using ${algorithm} algorithm and threshold ${threshold}`}
       />
     </div>
   );

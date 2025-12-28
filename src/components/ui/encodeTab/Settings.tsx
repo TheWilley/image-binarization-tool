@@ -71,7 +71,7 @@ export default function Setting({
           <legend className='fieldset-legend'>Settings</legend>
           <div className='form-control mb-6'>
             <label className='label'>
-              <span className='label-text font-semibold mb-2'>Threshold Mode</span>
+              <span className='label-text font-semibold mb-2'>Threshold Algorithm</span>
             </label>
             <select
               value={algorithm}
