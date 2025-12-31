@@ -1,3 +1,5 @@
+import type { algorithms } from '../data/algorithms';
+
 export type Setter<T> = React.Dispatch<React.SetStateAction<T>>;
 
 export interface RLEData {
@@ -5,3 +7,5 @@ export interface RLEData {
   height: number;
   runs: number[];
 }
+
+export type Algorithm = (typeof algorithms)[number];

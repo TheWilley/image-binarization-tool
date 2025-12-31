@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Algorithm } from '../../../hooks/useEncode';
+import type { Algorithm } from '../../../global/types';
 import Setting from '../encodeTab/Settings';
 import Results from '../../shared/Results';
 import Actions from '../../shared/Actions';

@@ -2,27 +2,7 @@ import { readImg } from 'image-js';
 import { useCallback, useEffect, useState } from 'react';
 import type { Mask, ThresholdOptions } from 'image-js';
 import RLEImageProcessor from '../utils/rleImageProcessor';
-
-export const algorithms = [
-  'manual',
-  'huang',
-  'intermodes',
-  'isodata',
-  'li',
-  'maxEntropy',
-  'mean',
-  'minimum',
-  'minError',
-  'moments',
-  'otsu',
-  'percentile',
-  'renyiEntropy',
-  'shanbhag',
-  'triangle',
-  'yen',
-] as const;
-
-export type Algorithm = (typeof algorithms)[number];
+import { type Algorithm } from '../global/types';
 
 function imageToUrl(
   image: Mask,

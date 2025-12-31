@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
-import { algorithms, type Algorithm } from '../../../hooks/useEncode';
+import { algorithms } from '../../../data/algorithms';
 import type { Setter } from '../../../global/types';
 import { ThresholdAlgorithm } from './ThresholdAlgorithm';
 

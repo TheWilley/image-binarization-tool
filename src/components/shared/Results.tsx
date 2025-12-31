@@ -1,5 +1,5 @@
 import ImageCard from './ImageCard';
-import type { Algorithm } from '../../hooks/useEncode';
+import type { Algorithm } from '../../global/types';
 
 export default function Results({
   originalUrl,

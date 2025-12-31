@@ -1,4 +1,4 @@
-import type { Algorithm } from '../hooks/useEncode';
+import type { Algorithm } from '../global/types';
 
 export const ALGORITHM_REFERENCES: Record<Algorithm, string[]> = {
   huang: [
