@@ -1,6 +1,6 @@
 import { readImg } from 'image-js';
 import { useCallback, useEffect, useState } from 'react';
-import type { Mask } from 'image-js';
+import type { Mask, ThresholdOptions } from 'image-js';
 import RLEImageProcessor from '../utils/rleImageProcessor';
 
 export const algorithms = [
@@ -76,6 +76,32 @@ function imageToUrl(
   }, 'image/png');
 }
 
+async function applyThresholding(
+  imgElement: HTMLImageElement,
+  options: {
+    algorithm: Algorithm | undefined;
+    thresholdValue: number;
+    invert: boolean;
+  }
+) {
+  const { algorithm, thresholdValue, invert } = options;
+
+  const image = readImg(imgElement);
+  const grayImage = image.grey();
+
+  // We need dynamic properties here as any threshold value
+  // will overide the algorithm
+  const thresholdOptions: ThresholdOptions =
+    algorithm !== 'manual' ? { algorithm } : { threshold: thresholdValue / 255 };
+  const thresholdedImage = grayImage.threshold(thresholdOptions);
+
+  return new Promise<{ url: string; encodedData: string }>((resolve) => {
+    imageToUrl(thresholdedImage, invert, (url, encodedData) => {
+      resolve({ url, encodedData });
+    });
+  });
+}
+
 export default function useEncode(
   file: File | null,
   thresholdValue: number,
@@ -102,23 +128,18 @@ export default function useEncode(
       setOriginalUrl(dataUrl);
 
       const img = new Image();
+      img.src = dataUrl;
+
       img.onload = async () => {
         try {
-          const image = readImg(img);
-          const grayImage = image.grey();
-
-          // We need dynamic properties here as any threshold value
-          // will overide the algorithm
-          const thresholdedImage = grayImage.threshold({
-            ...(algorithm !== 'manual'
-              ? { algorithm }
-              : { threshold: thresholdValue / 255 }),
+          const { url, encodedData } = await applyThresholding(img, {
+            algorithm,
+            thresholdValue,
+            invert,
           });
 
-          imageToUrl(thresholdedImage, invert, (url, encodedData) => {
-            setEncodedData(encodedData);
-            setThresholdedUrl(url);
-          });
+          setEncodedData(encodedData);
+          setThresholdedUrl(url);
         } catch (error) {
           console.error('Error processing image:', error);
           setThresholdedUrl(null);
@@ -126,16 +147,11 @@ export default function useEncode(
           setProcessing(false);
         }
       };
+
       img.onerror = () => {
         console.error('Error loading image into HTMLImageElement.');
         setProcessing(false);
       };
-      img.src = dataUrl;
-    };
-
-    reader.onerror = (error) => {
-      console.error('Error reading file:', error);
-      setProcessing(false);
     };
 
     reader.readAsDataURL(file);
