@@ -121,7 +121,7 @@ export const ALGORITHM_REFERENCES: Record<Algorithm, string[]> = {
     'https://github.com/fiji/Auto_Threshold/blob/master/src/main/java/fiji/threshold/Auto_Threshold.java',
     '[NewLine]',
     'Zack, G. W., Rogers, W. E., & Latt, S. A. (1977). Automatic measurement of sister chromatid exchange frequency. Journal of Histochemistry & Cytochemistry, 25(7), 741–753',
-    'https://doi.org/10.1177/25.7.894063',
+    'https://doi.org/10.1177/25.7.70454',
     '[NewLine]',
     'Modified from Johannes Schindelin plugin',
   ],
