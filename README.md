@@ -29,7 +29,7 @@ $ npm run dev
 
 ## About RLE Encoded Data
 
-Seeing as a binary image is built with exactly two values, RLE encoding is rather efficient as large white / black sections (runs) are common. Of course, the less variation the better the compression ratio. This means we can store images in just a couple of KB.
+Seeing as a binary image is built with exactly two values, RLE encoding is rather efficient as large sections (runs) of the same color are common. Of course, the less variation the better the compression ratio. This means we can store images in just a couple of KB.
 
 The decoder parses strings using a custom syntax to extract parameters and render a image:
 
