@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
 import { algorithms } from '../../../data/algorithms';
-import type { Setter } from '../../../global/types';
+import type { Colors, Setter, Algorithm } from '../../../global/types';
 import { ThresholdAlgorithm } from './ThresholdAlgorithm';
 
 export default function Setting({
@@ -9,9 +9,11 @@ export default function Setting({
   processing,
   algorithm,
   invert,
+  colors,
   setSelectedFile,
   setAlgorithm,
   setInvert,
+  setColors,
 }: {
   selectedFile: File | null;
   threshold: number;
@@ -19,9 +21,11 @@ export default function Setting({
   processing: boolean;
   algorithm: Algorithm;
   invert: boolean;
+  colors: Colors;
   setSelectedFile: Setter<File | null>;
   setAlgorithm: Setter<Algorithm>;
   setInvert: Setter<boolean>;
+  setColors: Setter<Colors>;
 }) {
   const [localThreshold, setLocalThreshold] = useState(128);
 
@@ -48,6 +52,22 @@ export default function Setting({
 
   const handleInvertChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInvert(event.target.checked);
+  };
+
+  const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+
+    setColors((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleDefaultChange = () => {
+    setColors({
+      aboveThresholdColor: '#ffffff',
+      belowThresholdColor: '#000000',
+    });
   };
 
   return (
@@ -87,28 +107,68 @@ export default function Setting({
             </select>
             <ThresholdAlgorithm algorithm={algorithm} />
           </div>
+
           {algorithm === 'manual' && (
+            <div className='form-control mb-6'>
+              <label className='label'>
+                <span className='label-text font-semibold mb-2'>
+                  Threshold Value (0–255):{' '}
+                  <span className='text-base-content'>{localThreshold}</span>{' '}
+                </span>
+              </label>
+              <input
+                type='range'
+                min='0'
+                max='255'
+                value={localThreshold}
+                onChange={handleThresholdChange}
+                onMouseUp={handleThresholdChangeCommit}
+                onTouchEnd={handleThresholdChangeCommit}
+                disabled={!selectedFile || processing}
+                className='range range-primary w-full'
+              />
+            </div>
+          )}
+
           <div className='form-control mb-6'>
             <label className='label'>
-              <span className='label-text font-semibold mb-2'>
-                Threshold Value (0–255):{' '}
-                  <span className='text-base-content'>{localThreshold}</span>{' '}
-              </span>
+              <span className='label-text font-semibold mb-2'>Colors</span>
             </label>
-            <input
-              type='range'
-              min='0'
-              max='255'
-              value={localThreshold}
-              onChange={handleThresholdChange}
-              onMouseUp={handleThresholdChangeCommit}
-              onTouchEnd={handleThresholdChangeCommit}
+            <br />
+            <label className='label'>
+              <input
+                type='color'
+                name='aboveThresholdColor'
+                value={colors.aboveThresholdColor}
+                onChange={handleColorChange}
                 disabled={!selectedFile || processing}
-              className='range range-primary w-full'
-            />
+                className=''
+              />
+              Above Threshold
+            </label>
+            <br />
+            <label className='label mt-2'>
+              <input
+                type='color'
+                name='belowThresholdColor'
+                value={colors.belowThresholdColor}
+                onChange={handleColorChange}
+                disabled={!selectedFile || processing}
+                className=''
+              />
+              Below Threshold
+            </label>
+            <br />
+            <button className='btn btn-sm mt-2' onClick={handleDefaultChange}>
+              Default
+            </button>
           </div>
-          )}
+
           <div className='form-control mb-6'>
+            <label className='label'>
+              <span className='label-text font-semibold mb-2'>Modifiers</span>
+            </label>
+            <br />
             <label className='label'>
               <input
                 type='checkbox'

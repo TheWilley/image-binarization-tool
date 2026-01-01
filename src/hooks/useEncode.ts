@@ -2,11 +2,13 @@ import { readImg } from 'image-js';
 import { useCallback, useEffect, useState } from 'react';
 import type { Mask, ThresholdOptions } from 'image-js';
 import RLEImageProcessor from '../utils/rleImageProcessor';
-import { type Algorithm } from '../global/types';
+import { type Algorithm, type Colors } from '../global/types';
+import { hexToRgb } from '../utils/hexToRgb';
 
 function imageToUrl(
   image: Mask,
   invert: boolean,
+  colors: Colors,
   callback: (url: string, encodedData: string) => void
 ) {
   const { width, height } = image;
@@ -26,24 +28,28 @@ function imageToUrl(
   if (ctx) {
     ctx.imageSmoothingEnabled = false;
 
-    // Prepare an RGBA output buffer
+    // Parse the hex colors
+    const above = hexToRgb(colors.aboveThresholdColor);
+    const below = hexToRgb(colors.belowThresholdColor);
+
     const output = new Uint8ClampedArray(width * height * 4);
 
     for (let i = 0; i < width * height; i++) {
-      const v = raw[i] ? (invert ? 0 : 255) : invert ? 255 : 0; // On or off → white or black
+      const isPixelOn = !!raw[i];
+
+      const useAboveColor = invert ? !isPixelOn : isPixelOn;
+      const color = useAboveColor ? above : below;
+
       const idx = i * 4; // RGBA stride
-      output[idx] = v; // R
-      output[idx + 1] = v; // G
-      output[idx + 2] = v; // B
-      output[idx + 3] = 255; // A (fully opaque)
+      output[idx] = color.r; //     R
+      output[idx + 1] = color.g; // G
+      output[idx + 2] = color.b; // B
+      output[idx + 3] = 255; //     Alpha
     }
 
     const imgData = new ImageData(output, width, height);
-    encodedData = new RLEImageProcessor().processImageData(
-      Array.from(imgData.data),
-      width,
-      height
-    );
+
+    encodedData = new RLEImageProcessor().processImageData(width, height, output, colors);
 
     ctx.putImageData(imgData, 0, 0);
   }
@@ -62,6 +68,7 @@ async function applyThresholding(
     algorithm: Algorithm | undefined;
     thresholdValue: number;
     invert: boolean;
+    colors: Colors;
   }
 ) {
   const { algorithm, thresholdValue, invert } = options;
@@ -76,7 +83,7 @@ async function applyThresholding(
   const thresholdedImage = grayImage.threshold(thresholdOptions);
 
   return new Promise<{ url: string; encodedData: string }>((resolve) => {
-    imageToUrl(thresholdedImage, invert, (url, encodedData) => {
+    imageToUrl(thresholdedImage, invert, options.colors, (url, encodedData) => {
       resolve({ url, encodedData });
     });
   });
@@ -86,7 +93,8 @@ export default function useEncode(
   file: File | null,
   thresholdValue: number,
   algorithm: Algorithm,
-  invert: boolean
+  invert: boolean,
+  colors: Colors
 ) {
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
   const [thresholdedUrl, setThresholdedUrl] = useState<string | null>(null);
@@ -116,6 +124,7 @@ export default function useEncode(
             algorithm,
             thresholdValue,
             invert,
+            colors,
           });
 
           setEncodedData(encodedData);
@@ -135,7 +144,7 @@ export default function useEncode(
     };
 
     reader.readAsDataURL(file);
-  }, [algorithm, file, invert, thresholdValue]);
+  }, [algorithm, colors, file, invert, thresholdValue]);
 
   useEffect(() => {
     processImage();
