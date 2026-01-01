@@ -64,10 +64,14 @@ export default function Setting({
   };
 
   const handleDefaultChange = () => {
-    setColors({
-      aboveThresholdColor: '#ffffff',
-      belowThresholdColor: '#000000',
-    });
+    if (
+      colors.aboveThresholdColor !== '#ffffff' ||
+      colors.belowThresholdColor !== '#000000'
+    )
+      setColors({
+        aboveThresholdColor: '#ffffff',
+        belowThresholdColor: '#000000',
+      });
   };
 
   return (
@@ -159,7 +163,14 @@ export default function Setting({
               Below Threshold
             </label>
             <br />
-            <button className='btn btn-sm mt-2' onClick={handleDefaultChange}>
+            <button
+              className='btn btn-sm mt-2'
+              onClick={handleDefaultChange}
+              disabled={
+                colors.aboveThresholdColor == '#ffffff' &&
+                colors.belowThresholdColor == '#000000'
+              }
+            >
               Default
             </button>
           </div>
