@@ -5,7 +5,7 @@ import { prefixHex } from './prefixHex';
 export default class RLEImageProcessor {
   private rgbaToBinary(rgbaArray: Uint8ClampedArray, colors: Colors) {
     const pixelCount = rgbaArray.length / 4;
-    const binaryArray = new Array(pixelCount);
+    const binaryArray = new Uint8Array(pixelCount);
 
     const above = hexToRgb(colors.aboveThresholdColor);
     const below = hexToRgb(colors.belowThresholdColor);
@@ -32,7 +32,7 @@ export default class RLEImageProcessor {
     return binaryArray;
   }
 
-  private binaryToRgba(binaryArray: number[], colors: Colors) {
+  private binaryToRgba(binaryArray: Uint8Array, colors: Colors) {
     const rgbaArray = new Uint8ClampedArray(binaryArray.length * 4);
 
     const above = hexToRgb(colors.aboveThresholdColor);
@@ -40,31 +40,28 @@ export default class RLEImageProcessor {
 
     for (let i = 0; i < binaryArray.length; i++) {
       const pixelIndex = i * 4;
-
-      const color = binaryArray[i] ? above : below;
+      const color = binaryArray[i] === 1 ? above : below;
 
       rgbaArray[pixelIndex] = color.r;
       rgbaArray[pixelIndex + 1] = color.g;
       rgbaArray[pixelIndex + 2] = color.b;
-      rgbaArray[pixelIndex + 3] = 255; // Alpha
+      rgbaArray[pixelIndex + 3] = 255;
     }
 
     return rgbaArray;
   }
 
-  private encodeRunLength(binaryArray: number[]) {
-    if (binaryArray.length === 0) {
-      return [];
-    }
+  private encodeRunLength(binaryArray: Uint8Array) {
+    if (binaryArray.length === 0) return [];
 
     const encoded: number[] = [];
-    const startValue = binaryArray[0];
-    encoded.push(startValue);
-
-    let count = 1;
     let previous = binaryArray[0];
 
-    for (let i = 1; i < binaryArray.length; i++) {
+    // The first value in encoded is the starting bit (0 or 1)
+    encoded.push(previous);
+
+    let count = 0;
+    for (let i = 0; i < binaryArray.length; i++) {
       if (binaryArray[i] !== previous) {
         encoded.push(count);
         count = 1;
@@ -79,16 +76,23 @@ export default class RLEImageProcessor {
   }
 
   private decodeRunLength(encoded: number[]) {
-    if (encoded.length === 0) {
-      return [];
+    if (encoded.length === 0) return new Uint8Array(0);
+
+    // Calculate total size to pre-allocate memory
+    // Start i at 1 because encoded[0] is the starting value
+    let totalLength = 0;
+    for (let i = 1; i < encoded.length; i++) {
+      totalLength += encoded[i];
     }
 
-    const binaryArray: number[] = [];
+    const binaryArray = new Uint8Array(totalLength);
     let currentValue = encoded[0];
 
+    let offset = 0;
     for (let i = 1; i < encoded.length; i++) {
       const runLength = encoded[i];
-      binaryArray.push(...Array(runLength).fill(currentValue));
+      binaryArray.fill(currentValue, offset, offset + runLength);
+      offset += runLength;
       currentValue = 1 - currentValue;
     }
 
