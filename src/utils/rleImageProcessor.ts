@@ -21,7 +21,7 @@ export default class RLEImageProcessor {
     return binaryArray;
   }
 
-  private binaryToRgba(binaryArray: number[], alphaValue: number): Uint8ClampedArray {
+  private binaryToRgba(binaryArray: number[]): Uint8ClampedArray {
     const rgbaArray = new Uint8ClampedArray(binaryArray.length * 4);
 
     for (let i = 0; i < binaryArray.length; i++) {
@@ -38,7 +38,7 @@ export default class RLEImageProcessor {
         rgbaArray[pixelIndex + 2] = 255;
       }
 
-      rgbaArray[pixelIndex + 3] = alphaValue;
+      rgbaArray[pixelIndex + 3] = 255;
     }
 
     return rgbaArray;
@@ -145,7 +145,7 @@ export default class RLEImageProcessor {
     return {
       width,
       height,
-      rgbaData: this.binaryToRgba(binaryArray, 255),
+      rgbaData: this.binaryToRgba(binaryArray),
     };
   }
 }
