@@ -12,7 +12,7 @@ function ThresholdAlgorithmDisplay(props: { references: string[] }) {
       <input
         type='checkbox'
         checked={keepReferencesOpen}
-        onClick={(e) => setKeepReferencesOpen(e.currentTarget.checked)}
+        onChange={(e) => setKeepReferencesOpen(e.currentTarget.checked)}
       />
       <div className='collapse-title font-semibold'>References</div>
       <div className='collapse-content'>
