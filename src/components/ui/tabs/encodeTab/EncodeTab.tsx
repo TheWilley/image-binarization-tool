@@ -1,21 +1,24 @@
 import { useState } from 'react';
-import type { Algorithm } from '../../../../global/types';
 import Setting from '../encodeTab/Settings';
 import Results from '../../../shared/Results';
 import Actions from '../../../shared/Actions';
 import EncodedData from '../encodeTab/EncodedData';
 import useEncode from '../../../../hooks/useEncode';
-import { type Colors } from '../../../../global/types';
+import useSettings from '../../../../hooks/useSettings';
 
 export default function EncodeTab() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [threshold, setThreshold] = useState(128);
-  const [algorithm, setAlgorithm] = useState<Algorithm>('otsu');
-  const [invert, setInvert] = useState(false);
-  const [colors, setColors] = useState<Colors>({
-    aboveThresholdColor: '#ffffff',
-    belowThresholdColor: '#000000',
-  });
+
+  const {
+    algorithm,
+    setAlgorithm,
+    colors,
+    setColors,
+    invert,
+    setInvert,
+    threshold,
+    setThreshold,
+  } = useSettings();
 
   const { originalUrl, thresholdedUrl, processing, encodedData, fileIsLarge } = useEncode(
     selectedFile,
