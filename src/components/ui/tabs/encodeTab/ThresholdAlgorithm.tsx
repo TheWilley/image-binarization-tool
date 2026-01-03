@@ -18,7 +18,7 @@ function ThresholdAlgorithmDisplay(props: { references: string[] }) {
       <div className='collapse-content'>
         <ul className='p-1 list-disc ml-3'>
           {props.references.map((reference) => (
-            <li className={reference === newLineWord ? 'list-none ' : ''}>
+            <li key={reference} className={reference === newLineWord ? 'list-none ' : ''}>
               {isValidHttpUrl(reference) ? (
                 <a href={reference} className='link' target='_blank'>
                   {reference}
