@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { isValidHttpUrl } from '../../../utils/isValidHttpUrl';
-import { ALGORITHM_REFERENCES } from '../../../data/algorithm_references';
-import { type Algorithm } from '../../../global/types';
+import { isValidHttpUrl } from '../../../../utils/isValidHttpUrl';
+import { ALGORITHM_REFERENCES } from '../../../../data/algorithm_references';
+import { type Algorithm } from '../../../../global/types';
 
 function ThresholdAlgorithmDisplay(props: { references: string[] }) {
   const [keepReferencesOpen, setKeepReferencesOpen] = useState(false);

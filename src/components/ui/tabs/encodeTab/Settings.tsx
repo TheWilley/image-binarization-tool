@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
-import { algorithms } from '../../../data/algorithms';
-import type { Colors, Setter, Algorithm } from '../../../global/types';
+import { algorithms } from '../../../../data/algorithms';
+import type { Colors, Setter, Algorithm } from '../../../../global/types';
 import { ThresholdAlgorithm } from './ThresholdAlgorithm';
 
 export default function Setting({

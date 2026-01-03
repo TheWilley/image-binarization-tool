@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import type { Algorithm } from '../../../global/types';
+import type { Algorithm } from '../../../../global/types';
 import Setting from '../encodeTab/Settings';
-import Results from '../../shared/Results';
-import Actions from '../../shared/Actions';
+import Results from '../../../shared/Results';
+import Actions from '../../../shared/Actions';
 import EncodedData from '../encodeTab/EncodedData';
-import useEncode from '../../../hooks/useEncode';
-import { type Colors } from '../../../global/types';
+import useEncode from '../../../../hooks/useEncode';
+import { type Colors } from '../../../../global/types';
 
 export default function EncodeTab() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

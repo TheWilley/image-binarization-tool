@@ -2,8 +2,8 @@ import Footer from './components/ui/base/Footer';
 import Wrapper from './components/ui/base/Wrapper';
 import Tabs from './components/shared/Tabs';
 import Header from './components/ui/base/Header';
-import DecodeTab from './components/ui/tabs/DecodeTab';
-import EncodeTab from './components/ui/tabs/EncodeTab';
+import DecodeTab from './components/ui/tabs/decodeTab/DecodeTab';
+import EncodeTab from './components/ui/tabs/encodeTab/EncodeTab';
 import { useSearchParams } from 'react-router-dom';
 
 export default function App() {

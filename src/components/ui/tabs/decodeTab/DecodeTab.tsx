@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import ImageCard from '../../shared/ImageCard';
-import Actions from '../../shared/Actions';
-import useDecode from '../../../hooks/useDecode';
+import ImageCard from '../../../shared/ImageCard';
+import Actions from '../../../shared/Actions';
+import useDecode from '../../../../hooks/useDecode';
 
 export default function DecodeTab() {
   const [encodedData, setEncodedData] = useState('');
