@@ -100,12 +100,19 @@ export default function useEncode(
   const [thresholdedUrl, setThresholdedUrl] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [encodedData, setEncodedData] = useState<string>('');
+  const [fileIsLarge, setFileIsLarge] = useState<boolean>(false);
 
   const processImage = useCallback(() => {
     if (!file) {
       setOriginalUrl(null);
       setThresholdedUrl(null);
       return;
+    }
+
+    if (file && file.size > 1000000) {
+      setFileIsLarge(true);
+    } else {
+      setFileIsLarge(false);
     }
 
     setProcessing(true);
@@ -155,5 +162,12 @@ export default function useEncode(
     };
   }, [processImage, invert]);
 
-  return { originalUrl, thresholdedUrl, processing, encodedData, processImage };
+  return {
+    originalUrl,
+    thresholdedUrl,
+    processing,
+    encodedData,
+    fileIsLarge,
+    processImage,
+  };
 }

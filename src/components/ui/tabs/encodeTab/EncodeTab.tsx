@@ -17,7 +17,7 @@ export default function EncodeTab() {
     belowThresholdColor: '#000000',
   });
 
-  const { originalUrl, thresholdedUrl, processing, encodedData } = useEncode(
+  const { originalUrl, thresholdedUrl, processing, encodedData, fileIsLarge } = useEncode(
     selectedFile,
     threshold,
     algorithm,
@@ -39,6 +39,7 @@ export default function EncodeTab() {
         setInvert={setInvert}
         invert={invert}
         setColors={setColors}
+        showLargeFileWarning={fileIsLarge}
       />
 
       <Results

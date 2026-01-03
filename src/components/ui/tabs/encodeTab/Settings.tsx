@@ -10,6 +10,7 @@ export default function Setting({
   algorithm,
   invert,
   colors,
+  showLargeFileWarning,
   setSelectedFile,
   setAlgorithm,
   setInvert,
@@ -22,6 +23,7 @@ export default function Setting({
   algorithm: Algorithm;
   invert: boolean;
   colors: Colors;
+  showLargeFileWarning: boolean;
   setSelectedFile: Setter<File | null>;
   setAlgorithm: Setter<Algorithm>;
   setInvert: Setter<boolean>;
@@ -90,6 +92,11 @@ export default function Setting({
             className='file-input file-input-bordered w-full'
           />
         </div>
+        {showLargeFileWarning && (
+          <span className='text-warning'>
+            The uploaded image exceeds 1MB, which may result in longer processing times.
+          </span>
+        )}
 
         <fieldset className='fieldset border border-base-300 p-3 rounded-md shadow-md shadow-black'>
           <legend className='fieldset-legend'>Settings</legend>
