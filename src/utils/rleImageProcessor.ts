@@ -1,3 +1,4 @@
+import { RLE_SCHEMA, RLE_SEPERATOR } from '../data/rleSchema';
 import type { Colors, Hex, RLEData } from '../global/types';
 import { hexToRgb } from './hexToRgb';
 import { prefixHex } from './prefixHex';
@@ -100,46 +101,39 @@ export default class RLEImageProcessor {
   }
 
   private stringifyRunLength(data: RLEData) {
-    return `${data.width}|${data.height}|${prefixHex(
-      data.colors.belowThresholdColor,
-      'remove'
-    )}|${prefixHex(data.colors.aboveThresholdColor, 'remove')}|${data.runs.join(',')}`;
+    const segments = [
+      data.width,
+      data.height,
+      prefixHex(data.colors.belowThresholdColor, 'remove'),
+      prefixHex(data.colors.aboveThresholdColor, 'remove'),
+      data.runs.join(','),
+    ];
+    return segments.join(RLE_SEPERATOR);
   }
 
   private parseRunLengthString(str: string) {
-    try {
-      const parts = str.split('|');
-      if (parts.length < 5) return null;
+    const parts = str.split(RLE_SEPERATOR);
 
-      const width = parseInt(parts[0], 10);
-      const height = parseInt(parts[1], 10);
-      const below = prefixHex(String(parts[2]) as Hex, 'add');
-      const above = prefixHex(String(parts[3]) as Hex, 'add');
-      const runsStr = String(parts[4]);
+    // Validation against schema length
+    if (parts.length < RLE_SCHEMA.length) return null;
 
-      if (isNaN(width) || isNaN(height)) {
-        return null;
-      }
+    // Destructure for readability
+    const [wStr, hStr, belowHex, aboveHex, runsStr] = parts;
 
-      const runs =
-        runsStr.trim() === '' ? [] : runsStr.split(',').map((n) => parseInt(n, 10));
+    const width = parseInt(wStr, 10);
+    const height = parseInt(hStr, 10);
 
-      const colors: Colors = {
-        aboveThresholdColor: above,
-        belowThresholdColor: below,
-      };
+    if (isNaN(width) || isNaN(height)) return null;
 
-      if (runs.some(isNaN)) return null;
-
-      return {
-        width,
-        height,
-        runs,
-        colors,
-      };
-    } catch {
-      return null;
-    }
+    return {
+      width,
+      height,
+      colors: {
+        belowThresholdColor: prefixHex(belowHex as Hex, 'add'),
+        aboveThresholdColor: prefixHex(aboveHex as Hex, 'add'),
+      },
+      runs: runsStr ? runsStr.split(',').map(Number) : [],
+    };
   }
 
   public processImageData(
