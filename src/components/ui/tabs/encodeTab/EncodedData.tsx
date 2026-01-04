@@ -2,7 +2,7 @@ import { useState } from 'react';
 import CopyIcon from '../../../../icons/CopyIcon';
 import ActionCollapse from '../../../shared/ActionCollapse';
 
-export default function EncodedData({ encodedData }: { encodedData: string }) {
+export default function BottomDrawers({ encodedData }: { encodedData: string }) {
   const [copied, setCopied] = useState('Copy');
 
   const handleCopy = () => {

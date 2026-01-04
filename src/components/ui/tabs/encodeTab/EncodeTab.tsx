@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Setting from '../encodeTab/Settings';
 import Results from '../../../shared/Results';
 import Actions from '../../../shared/Actions';
-import EncodedData from '../encodeTab/EncodedData';
+import BottomDrawers from '../encodeTab/EncodedData';
 import useEncode from '../../../../hooks/useEncode';
 import useSettings from '../../../../hooks/useSettings';
 
@@ -54,7 +54,7 @@ export default function EncodeTab() {
       />
 
       <Actions url={thresholdedUrl} processing={processing} />
-      <EncodedData encodedData={encodedData} />
+      <BottomDrawers encodedData={encodedData} />
     </>
   );
 }
