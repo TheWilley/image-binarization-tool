@@ -25,7 +25,7 @@ export default function ActionCollapse({
       <div className='collapse-content text-sm'>
         <div className='flex justify-between items-center'>
           {actionButtons.map((button) => (
-            <button className='btn' onClick={button.action}>
+            <button className='btn' key={button.text} onClick={button.action}>
               {button.icon}
               {button.text}
             </button>
