@@ -1,6 +1,6 @@
 # RLE Encoded Samples
 
-These are some sample RLE encoded samples which can be [decoded on the website](https://thewilley.github.io/image-binarization-tool/?tab=decode). Notice how image complexity and dimensions increases the size of the samples. Sizes were calculated using [codebeautify.org](https://codebeautify.org/calculate-string-length).
+These are some RLE encoded samples which can be [decoded on the website](https://thewilley.github.io/image-binarization-tool/?tab=decode). Notice how image complexity and dimensions increases the size of the samples. Sizes were calculated using [codebeautify.org](https://codebeautify.org/calculate-string-length).
 
 ## Outline of a Cat
 
