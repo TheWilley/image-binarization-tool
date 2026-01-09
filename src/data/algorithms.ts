@@ -1,3 +1,6 @@
+/**
+ * List of available thresholding algorithms.
+ */
 export const algorithms = [
   'manual',
   'huang',

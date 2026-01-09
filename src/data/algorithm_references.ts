@@ -1,5 +1,8 @@
 import type { Algorithm } from '../global/types';
 
+/**
+ * References for each algorithm implemented in the application.
+ */
 export const ALGORITHM_REFERENCES: Record<Algorithm, string[]> = {
   huang: [
     'https://github.com/image-js/image-js/blob/main/src/operations/thresholds/huang.ts',

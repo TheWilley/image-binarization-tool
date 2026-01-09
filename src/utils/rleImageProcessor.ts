@@ -4,6 +4,12 @@ import { hexToRgb } from './hexToRgb';
 import { prefixHex } from './prefixHex';
 
 export default class RLEImageProcessor {
+  /**
+   * Converts RGBA image data to a binary representation based on threshold colors.
+   * @param rgbaArray The RGBA image data array.
+   * @param colors The colors used for thresholding.
+   * @returns A Uint8Array representing the binary image data.
+   */
   private rgbaToBinary(rgbaArray: Uint8ClampedArray, colors: Colors) {
     const pixelCount = rgbaArray.length / 4;
     const binaryArray = new Uint8Array(pixelCount);
@@ -33,6 +39,12 @@ export default class RLEImageProcessor {
     return binaryArray;
   }
 
+  /**
+   * Converts a binary representation of an image back to RGBA format.
+   * @param binaryArray The binary image data array.
+   * @param colors The colors used for thresholding.
+   * @returns A Uint8ClampedArray representing the RGBA image data.
+   */
   private binaryToRgba(binaryArray: Uint8Array, colors: Colors) {
     const rgbaArray = new Uint8ClampedArray(binaryArray.length * 4);
 
@@ -52,6 +64,11 @@ export default class RLEImageProcessor {
     return rgbaArray;
   }
 
+  /**
+   * Encodes a binary array using a modified run-length encoding (RLE).
+   * @param binaryArray The binary image data array.
+   * @returns An array of numbers representing the run-length encoded data.
+   */
   private encodeRunLength(binaryArray: Uint8Array) {
     if (binaryArray.length === 0) return [];
 
@@ -76,6 +93,11 @@ export default class RLEImageProcessor {
     return encoded;
   }
 
+  /**
+   * Decodes a run-length encoded array back to a binary array.
+   * @param encoded The run-length encoded data array.
+   * @returns A Uint8Array representing the binary image data.
+   */
   private decodeRunLength(encoded: number[]) {
     if (encoded.length === 0) return new Uint8Array(0);
 
@@ -100,6 +122,11 @@ export default class RLEImageProcessor {
     return binaryArray;
   }
 
+  /**
+   * Serializes RLEData into a string format.
+   * @param data The RLEData object to serialize.
+   * @returns A string representing the serialized RLE data.
+   */
   private stringifyRunLength(data: RLEData) {
     const segments = [
       data.width,
@@ -111,6 +138,11 @@ export default class RLEImageProcessor {
     return segments.join(RLE_SEPERATOR);
   }
 
+  /**
+   * Parses a run-length encoded string into an RLEData object.
+   * @param str The RLE string to parse.
+   * @returns An RLEData object or null if parsing fails.
+   */
   private parseRunLengthString(str: string) {
     const parts = str.split(RLE_SEPERATOR);
 
@@ -136,6 +168,14 @@ export default class RLEImageProcessor {
     };
   }
 
+  /**
+   * Processes RGBA image data into a run-length encoded string.
+   * @param width The width of the image.
+   * @param height The height of the image.
+   * @param rgbaData The RGBA image data array.
+   * @param colors The colors used for thresholding.
+   * @returns A string representing the run-length encoded image data.
+   */
   public processImageData(
     width: number,
     height: number,
@@ -153,6 +193,11 @@ export default class RLEImageProcessor {
     return this.stringifyRunLength(rleData);
   }
 
+  /**
+   * Decodes a run-length encoded string back into RGBA image data.
+   * @param data The RLE string to decode.
+   * @returns An object containing width, height, and RGBA image data array.
+   */
   public decodeImageData(data: string) {
     const rleData = this.parseRunLengthString(data);
     if (!rleData) {
