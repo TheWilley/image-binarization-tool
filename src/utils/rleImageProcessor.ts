@@ -1,5 +1,5 @@
 import { RLE_SCHEMA, RLE_SEPERATOR } from '../data/rleSchema';
-import type { Colors, Hex, RLEData } from '../global/types';
+import type { Colors, RLEData } from '../global/types';
 import { hexToRgb } from './hexToRgb';
 import { prefixHex } from './prefixHex';
 
@@ -161,8 +161,8 @@ export default class RLEImageProcessor {
       width,
       height,
       colors: {
-        belowThresholdColor: prefixHex(belowHex as Hex, 'add'),
-        aboveThresholdColor: prefixHex(aboveHex as Hex, 'add'),
+        belowThresholdColor: prefixHex(belowHex, 'add'),
+        aboveThresholdColor: prefixHex(aboveHex, 'add'),
       },
       runs: runsStr ? runsStr.split(',').map(Number) : [],
     };
