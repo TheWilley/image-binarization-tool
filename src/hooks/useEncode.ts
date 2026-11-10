@@ -4,6 +4,7 @@ import type {
   ThresholdWorkerRequest,
   ThresholdWorkerResponse,
 } from '../workers/threshold.worker';
+import { compressImage } from '../utils/compressImage.ts';
 
 // A single worker is shared by the whole app and created lazily on first use.
 // Each request gets an id so we can match a response to the call that made it.
@@ -140,8 +141,16 @@ export default function useEncode(
     setFileIsLarge(file.size > 1000000);
     setProcessing(true);
 
-    const url = URL.createObjectURL(file);
-    setOriginalUrl(url);
+    // Compress the image, to be shown besides the thresholded image.
+    // We don't need to display the full resolution image, it's only a comparison to the thresholded.
+    let url: string | null = null;
+    compressImage(file, 50)
+      .then((compressed) => {
+        if (cancelled) return;
+        url = URL.createObjectURL(compressed);
+        setOriginalUrl(url);
+      })
+      .catch((error) => console.error('Error compressing image:', error));
 
     loadFileIntoWorker(file)
       .then(() => {
@@ -154,7 +163,7 @@ export default function useEncode(
 
     return () => {
       cancelled = true;
-      URL.revokeObjectURL(url);
+      if (url) URL.revokeObjectURL(url);
     };
   }, [file]);
 
