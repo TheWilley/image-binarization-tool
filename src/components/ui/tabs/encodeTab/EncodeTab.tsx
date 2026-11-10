@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Setting from '../encodeTab/Settings';
 import Results from '../../../shared/Results';
+import ImageDiff from '../../../shared/ImageDiff';
 import Actions from '../../../shared/Actions';
 import BottomDrawers from '../encodeTab/EncodedData';
 import useEncode from '../../../../hooks/useEncode';
@@ -46,12 +47,15 @@ export default function EncodeTab() {
       />
 
       <Results
-        algorithm={algorithm}
-        originalUrl={originalUrl}
+        title={`Result (${algorithm})`}
         processing={processing}
-        threshold={threshold}
-        thresholdedUrl={thresholdedUrl}
-      />
+        ready={!!originalUrl && !!thresholdedUrl}
+        emptyLabel='Thresholded image will appear here'
+      >
+        {originalUrl && thresholdedUrl && (
+          <ImageDiff originalUrl={originalUrl} thresholdedUrl={thresholdedUrl} />
+        )}
+      </Results>
 
       <Actions url={thresholdedUrl} processing={processing} />
       <BottomDrawers encodedData={encodedData} />

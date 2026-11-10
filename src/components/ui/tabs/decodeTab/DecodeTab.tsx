@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ImageCard from '../../../shared/ImageCard';
+import Results from '../../../shared/Results';
 import Actions from '../../../shared/Actions';
 import useDecode from '../../../../hooks/useDecode';
 
@@ -23,13 +23,20 @@ export default function DecodeTab() {
         {error && <p className='text-red-500 mt-2 text-center'>{error}</p>}
       </div>
 
-      <ImageCard
+      <Results
         title='Decoded Image'
-        nullText='Decoded image will appear here'
-        url={decodedImageUrl}
         processing={processing}
-        altText='Decoded image from RLE data'
-      />
+        ready={!!decodedImageUrl}
+        emptyLabel='Decoded image will appear here'
+      >
+        {decodedImageUrl && (
+          <img
+            src={decodedImageUrl}
+            alt='Decoded image from RLE data'
+            className='w-full h-full object-contain max-h-[60vh]'
+          />
+        )}
+      </Results>
       <Actions processing={processing} url={decodedImageUrl} />
     </div>
   );
