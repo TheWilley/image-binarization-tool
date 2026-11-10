@@ -1,68 +1,30 @@
-import { readImg } from 'image-js';
 import { useCallback, useEffect, useState } from 'react';
-import type { Mask, ThresholdOptions } from 'image-js';
-import RLEImageProcessor from '../utils/rleImageProcessor';
 import { type Algorithm, type Colors } from '../global/types';
-import { hexToRgb } from '../utils/hexToRgb';
+import type {
+  ThresholdWorkerRequest,
+  ThresholdWorkerResponse,
+} from '../workers/threshold.worker';
 
-function imageToUrl(
-  image: Mask,
-  invert: boolean,
-  colors: Colors,
-  callback: (url: string, encodedData: string) => void
-) {
-  const { width, height } = image;
-  const raw = image.getRawImage().data;
-  let encodedData = '';
+// A single worker is shared by the whole app and created lazily on first use.
+// Each request gets an id so we can match a response to the call that made it.
+// So a listener cannot receive an older / newer result if many calls were made at the same time.
+let worker: Worker | null = null;
+let nextRequestId = 0;
 
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-
-  // Without the following steps pixels are invisible
-  // as we're working with ImageJS's "Mask" object here.
-  // We can turn the mask into visible pixels by mapping
-  // the "on" or "off" states onto a canvas, where 0 represents
-  // white and 1 black.
-  if (ctx) {
-    ctx.imageSmoothingEnabled = false;
-
-    // Parse the hex colors
-    const above = hexToRgb(colors.aboveThresholdColor);
-    const below = hexToRgb(colors.belowThresholdColor);
-
-    const output = new Uint8ClampedArray(width * height * 4);
-
-    for (let i = 0; i < width * height; i++) {
-      const isPixelOn = !!raw[i];
-
-      const useAboveColor = invert ? !isPixelOn : isPixelOn;
-      const color = useAboveColor ? above : below;
-
-      const idx = i * 4; // RGBA stride
-      output[idx] = color.r; //     R
-      output[idx + 1] = color.g; // G
-      output[idx + 2] = color.b; // B
-      output[idx + 3] = 255; //     Alpha
-    }
-
-    const imgData = new ImageData(output, width, height);
-
-    encodedData = new RLEImageProcessor().processImageData(width, height, output, colors);
-
-    ctx.putImageData(imgData, 0, 0);
+function getWorker() {
+  if (!worker) {
+    worker = new Worker(new URL('../workers/threshold.worker.ts', import.meta.url), {
+      type: 'module',
+    });
   }
-
-  canvas.toBlob((blob) => {
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      callback(url, encodedData);
-    }
-  }, 'image/png');
+  return worker;
 }
 
-async function applyThresholding(
+/**
+ * Runs the heavy thresholding + RLE work in a web worker so the UI stays responsive.
+ * Only canvas access (which needs the DOM) happens on the main thread.
+ */
+function applyThresholding(
   imgElement: HTMLImageElement,
   options: {
     algorithm: Algorithm | undefined;
@@ -71,21 +33,67 @@ async function applyThresholding(
     colors: Colors;
   }
 ) {
-  const { algorithm, thresholdValue, invert } = options;
+  const { width, height } = imgElement;
 
-  const image = readImg(imgElement);
-  const grayImage = image.grey();
+  // Workers have no DOM access, so read the raw pixels here first
+  const sourceCanvas = document.createElement('canvas');
+  sourceCanvas.width = width;
+  sourceCanvas.height = height;
+  const sourceCtx = sourceCanvas.getContext('2d');
+  if (!sourceCtx) return Promise.reject(new Error('Could not get canvas context'));
+  sourceCtx.drawImage(imgElement, 0, 0);
+  const { data } = sourceCtx.getImageData(0, 0, width, height);
 
-  // We need dynamic properties here as any threshold value
-  // will overide the algorithm
-  const thresholdOptions: ThresholdOptions =
-    algorithm !== 'manual' ? { algorithm } : { threshold: thresholdValue / 255 };
-  const thresholdedImage = grayImage.threshold(thresholdOptions);
+  const w = getWorker();
+  const id = nextRequestId++;
 
-  return new Promise<{ url: string; encodedData: string }>((resolve) => {
-    imageToUrl(thresholdedImage, invert, options.colors, (url, encodedData) => {
-      resolve({ url, encodedData });
-    });
+  return new Promise<{ url: string; encodedData: string }>((resolve, reject) => {
+    const cleanup = () => {
+      w.removeEventListener('message', onMessage);
+      w.removeEventListener('error', onError);
+    };
+
+    const onMessage = (e: MessageEvent<ThresholdWorkerResponse>) => {
+      const res = e.data;
+      // Ignore responses that belong to other (older/newer) requests
+      if (res.id !== id) return;
+      cleanup();
+
+      if (!res.ok) {
+        reject(new Error(res.error));
+        return;
+      }
+
+      // Turn the thresholded pixels from the worker into a PNG we can display
+      const canvas = document.createElement('canvas');
+      canvas.width = res.width;
+      canvas.height = res.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+      ctx.putImageData(new ImageData(res.output, res.width, res.height), 0, 0);
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Could not create image blob'));
+          return;
+        }
+        resolve({ url: URL.createObjectURL(blob), encodedData: res.encodedData });
+      }, 'image/png');
+    };
+
+    const onError = (e: ErrorEvent) => {
+      cleanup();
+      reject(new Error(e.message));
+    };
+
+    w.addEventListener('message', onMessage);
+    w.addEventListener('error', onError);
+
+    // The pixel buffer is transferred (not copied) to keep large images fast
+    const request: ThresholdWorkerRequest = { id, width, height, data, ...options };
+    w.postMessage(request, [data.buffer]);
   });
 }
 
