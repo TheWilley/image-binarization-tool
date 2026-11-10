@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { type Algorithm, type Colors } from '../global/types';
 import type {
   ThresholdWorkerRequest,
@@ -20,34 +20,21 @@ function getWorker() {
   return worker;
 }
 
+type SuccessResponse = Extract<ThresholdWorkerResponse, { ok: true }>;
+
 /**
- * Runs the heavy thresholding + RLE work in a web worker so the UI stays responsive.
- * Only canvas access (which needs the DOM) happens on the main thread.
+ * Sends a request to the worker and resolves with the response that carries
+ * the same id. The worker handles messages in order, so a "load" sent before
+ * a "process" is always finished first.
  */
-function applyThresholding(
-  imgElement: HTMLImageElement,
-  options: {
-    algorithm: Algorithm | undefined;
-    thresholdValue: number;
-    invert: boolean;
-    colors: Colors;
-  }
+function request(
+  message: DistributiveOmit<ThresholdWorkerRequest, 'id'>,
+  transfer: Transferable[] = []
 ) {
-  const { width, height } = imgElement;
-
-  // Workers have no DOM access, so read the raw pixels here first
-  const sourceCanvas = document.createElement('canvas');
-  sourceCanvas.width = width;
-  sourceCanvas.height = height;
-  const sourceCtx = sourceCanvas.getContext('2d');
-  if (!sourceCtx) return Promise.reject(new Error('Could not get canvas context'));
-  sourceCtx.drawImage(imgElement, 0, 0);
-  const { data } = sourceCtx.getImageData(0, 0, width, height);
-
   const w = getWorker();
   const id = nextRequestId++;
 
-  return new Promise<{ url: string; encodedData: string }>((resolve, reject) => {
+  return new Promise<SuccessResponse>((resolve, reject) => {
     const cleanup = () => {
       w.removeEventListener('message', onMessage);
       w.removeEventListener('error', onError);
@@ -59,28 +46,8 @@ function applyThresholding(
       if (res.id !== id) return;
       cleanup();
 
-      if (!res.ok) {
-        reject(new Error(res.error));
-        return;
-      }
-
-      // Turn the thresholded pixels from the worker into a PNG we can display
-      const canvas = document.createElement('canvas');
-      canvas.width = res.width;
-      canvas.height = res.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('Could not get canvas context'));
-        return;
-      }
-      ctx.putImageData(new ImageData(res.output, res.width, res.height), 0, 0);
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error('Could not create image blob'));
-          return;
-        }
-        resolve({ url: URL.createObjectURL(blob), encodedData: res.encodedData });
-      }, 'image/png');
+      if (res.ok) resolve(res);
+      else reject(new Error(res.error));
     };
 
     const onError = (e: ErrorEvent) => {
@@ -90,11 +57,59 @@ function applyThresholding(
 
     w.addEventListener('message', onMessage);
     w.addEventListener('error', onError);
-
-    // The pixel buffer is transferred (not copied) to keep large images fast
-    const request: ThresholdWorkerRequest = { id, width, height, data, ...options };
-    w.postMessage(request, [data.buffer]);
+    w.postMessage({ ...message, id }, transfer);
   });
+}
+
+// Omit that keeps working on each member of a union type
+type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
+
+/**
+ * Decodes the file once and hands its pixels to the worker, which keeps a
+ * greyscale copy. After this, changing settings never has to touch the file again.
+ */
+async function loadFileIntoWorker(file: File) {
+  const bitmap = await createImageBitmap(file);
+  const { width, height } = bitmap;
+
+  // Workers have no DOM access, so read the raw pixels here
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not get canvas context');
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const { data } = ctx.getImageData(0, 0, width, height);
+  // The pixel buffer is transferred (not copied) to keep large images fast
+  await request({ type: 'load', width, height, data }, [data.buffer]);
+}
+
+/**
+ * Asks the worker to threshold the loaded image with the given settings and
+ * turns the returned pixels into a PNG we can display.
+ */
+async function thresholdLoadedImage(options: {
+  algorithm: Algorithm | undefined;
+  thresholdValue: number;
+  invert: boolean;
+  colors: Colors;
+}) {
+  const res = await request({ type: 'process', ...options });
+  if (res.type !== 'process') throw new Error('Unexpected worker response');
+
+  const canvas = document.createElement('canvas');
+  canvas.width = res.width;
+  canvas.height = res.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not get canvas context');
+  ctx.putImageData(new ImageData(res.output, res.width, res.height), 0, 0);
+
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+  if (!blob) throw new Error('Could not create image blob');
+
+  return { url: URL.createObjectURL(blob), encodedData: res.encodedData };
 }
 
 export default function useEncode(
@@ -109,66 +124,68 @@ export default function useEncode(
   const [processing, setProcessing] = useState(false);
   const [encodedData, setEncodedData] = useState<string>('');
   const [fileIsLarge, setFileIsLarge] = useState<boolean>(false);
+  // The file whose pixels the worker currently holds
+  const [loadedFile, setLoadedFile] = useState<File | null>(null);
 
-  const processImage = useCallback(() => {
+  // Runs only when the file changes: show the original and load it into the worker.
+  useEffect(() => {
     if (!file) {
       setOriginalUrl(null);
       setThresholdedUrl(null);
+      setLoadedFile(null);
       return;
     }
 
-    if (file && file.size > 1000000) {
-      setFileIsLarge(true);
-    } else {
-      setFileIsLarge(false);
-    }
-
+    let cancelled = false;
+    setFileIsLarge(file.size > 1000000);
     setProcessing(true);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setOriginalUrl(dataUrl);
+    const url = URL.createObjectURL(file);
+    setOriginalUrl(url);
 
-      const img = new Image();
-      img.src = dataUrl;
+    loadFileIntoWorker(file)
+      .then(() => {
+        if (!cancelled) setLoadedFile(file);
+      })
+      .catch((error) => {
+        console.error('Error loading image:', error);
+        if (!cancelled) setProcessing(false);
+      });
 
-      img.onload = async () => {
-        try {
-          const { url, encodedData } = await applyThresholding(img, {
-            algorithm,
-            thresholdValue,
-            invert,
-            colors,
-          });
-
-          setEncodedData(encodedData);
-          setThresholdedUrl(url);
-        } catch (error) {
-          console.error('Error processing image:', error);
-          setThresholdedUrl(null);
-        } finally {
-          setProcessing(false);
-        }
-      };
-
-      img.onerror = () => {
-        console.error('Error loading image into HTMLImageElement.');
-        setProcessing(false);
-      };
-    };
-
-    reader.readAsDataURL(file);
-  }, [algorithm, colors, file, invert, thresholdValue]);
-
-  useEffect(() => {
-    processImage();
     return () => {
-      if (originalUrl) {
-        URL.revokeObjectURL(originalUrl);
-      }
+      cancelled = true;
+      URL.revokeObjectURL(url);
     };
-  }, [processImage, invert]);
+  }, [file]);
+
+  // Runs when the image finished loading or any setting changes.
+  // This is the cheap path: only the settings are sent to the worker.
+  useEffect(() => {
+    // Wait until the worker holds the current file (not a previous one)
+    if (!file || loadedFile !== file) return;
+
+    let cancelled = false;
+    setProcessing(true);
+
+    thresholdLoadedImage({ algorithm, thresholdValue, invert, colors })
+      .then(({ url, encodedData }) => {
+        // Drop results from settings that have already been replaced
+        if (cancelled) return;
+        setEncodedData(encodedData);
+        setThresholdedUrl(url);
+      })
+      .catch((error) => {
+        console.error('Error processing image:', error);
+        if (!cancelled) setThresholdedUrl(null);
+      })
+      .finally(() => {
+        if (!cancelled) setProcessing(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [file, loadedFile, algorithm, thresholdValue, invert, colors]);
 
   return {
     originalUrl,
@@ -176,6 +193,5 @@ export default function useEncode(
     processing,
     encodedData,
     fileIsLarge,
-    processImage,
   };
 }

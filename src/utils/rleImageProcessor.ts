@@ -183,6 +183,25 @@ export default class RLEImageProcessor {
     colors: Colors
   ) {
     const binaryArray = this.rgbaToBinary(rgbaData, colors);
+    return this.processBinaryData(width, height, binaryArray, colors);
+  }
+
+  /**
+   * Encodes an already-binary image (0 = below color, 1 = above color) into a
+   * run-length encoded string. Use this when the binary data is available
+   * directly, as it skips the RGBA -> binary conversion pass.
+   * @param width The width of the image.
+   * @param height The height of the image.
+   * @param binaryArray One entry per pixel, either 0 or 1.
+   * @param colors The colors used for thresholding.
+   * @returns A string representing the run-length encoded image data.
+   */
+  public processBinaryData(
+    width: number,
+    height: number,
+    binaryArray: Uint8Array,
+    colors: Colors
+  ) {
     const runs = this.encodeRunLength(binaryArray);
     const rleData: RLEData = {
       colors,
